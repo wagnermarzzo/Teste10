@@ -63,12 +63,6 @@
     .message.success {
       color: green;
     }
-    .btn-send {
-      background-color: #ff4081;
-    }
-    .btn-send:hover {
-      background-color: #e91e63;
-    }
     footer {
       text-align: center;
       padding: 15px;
@@ -139,11 +133,13 @@
     function salvarAgendamento(nomeCliente, dataHora, servico) {
       const horarioRef = ref(database, 'agendamentos/' + dataHora);
 
+      // Verificação se o horário já está ocupado
       get(horarioRef).then((snapshot) => {
         if (snapshot.exists()) {
           document.getElementById('message').innerHTML = "Este horário já está ocupado. Escolha outro.";
           document.getElementById('message').classList.add('error');
         } else {
+          // Salva no Firebase
           set(ref(database, 'agendamentos/' + dataHora + '/' + nomeCliente), {
             nome: nomeCliente,
             dataHora: dataHora,
