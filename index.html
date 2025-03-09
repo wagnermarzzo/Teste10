@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agendamento Online - Manicure e Pedicure</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f1f1f1;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #ff4081;
+      color: white;
+      padding: 15px 0;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .container {
+      width: 80%;
+      margin: 20px auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .message {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #333;
+    }
+    .message.error {
+      color: red;
+    }
+    .message.success {
+      color: green;
+    }
+    .btn-send {
+      background-color: #ff4081;
+    }
+    .btn-send:hover {
+      background-color: #e91e63;
+    }
+    footer {
+      text-align: center;
+      padding: 15px;
+      background-color: #ff4081;
+      color: white;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    Agendamento Online - Manicure e Pedicure
+  </header>
+
+  <div class="container">
+    <h2>Agende seu Atendimento</h2>
+    <form id="agendamentoForm">
+      <div class="form-group">
+        <label for="nomeCliente">Nome:</label>
+        <input type="text" id="nomeCliente" name="nomeCliente" required>
+      </div>
+
+      <div class="form-group">
+        <label for="dataHora">Data e Hora:</label>
+        <input type="datetime-local" id="dataHora" name="dataHora" required>
+      </div>
+
+      <div class="form-group">
+        <label for="servico">Selecione o Serviço:</label>
+        <select id="servico" name="servico" required>
+          <option value="Manicure e Pedicure">Manicure e Pedicure</option>
+        </select>
+      </div>
+
+      <button type="submit">Agendar</button>
+    </form>
+
+    <div class="message" id="message"></div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Michelly Vanessa - Manicure e Pedicure</p>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCS4CZMvoR5ncU91tRexpodsInLnxoshyk",
+      authDomain: "teste-6644a.firebaseapp.com",
+      projectId: "teste-6644a",
+      storageBucket: "teste-6644a.firebasestorage.app",
+      messagingSenderId: "217263201644",
+      appId: "1:217263201644:web:7dfc9c5b13b1751615a749",
+      measurementId: "G-4LSD66E81M"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    function salvarAgendamento(nomeCliente, dataHora, servico) {
+      const horarioRef = ref(database, 'agendamentos/' + dataHora);
+
+      get(horarioRef).then((snapshot) => {
+        if (snapshot.exists()) {
+          document.getElementById('message').innerHTML = "Este horário já está ocupado. Escolha outro.";
+          document.getElementById('message').classList.add('error');
+        } else {
+          set(ref(database, 'agendamentos/' + dataHora + '/' + nomeCliente), {
+            nome: nomeCliente,
+            dataHora: dataHora,
+            servico: servico
+          }).then(() => {
+            document.getElementById('message').innerHTML = "Agendamento realizado com sucesso!";
+            document.getElementById('message').classList.add('success');
+          }).catch((error) => {
+            document.getElementById('message').innerHTML = "Erro ao agendar: " + error.message;
+            document.getElementById('message').classList.add('error');
+          });
+        }
+      }).catch((error) => {
+        document.getElementById('message').innerHTML = "Erro ao verificar horário: " + error.message;
+        document.getElementById('message').classList.add('error');
+      });
+    }
+
+    document.getElementById('agendamentoForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const nomeCliente = document.getElementById('nomeCliente').value;
+      const dataHora = document.getElementById('dataHora').value;
+      const servico = document.getElementById('servico').value;
+
+      if (!nomeCliente || !dataHora || !servico) {
+        document.getElementById('message').innerHTML = "Preencha todos os campos.";
+        document.getElementById('message').classList.add('error');
+        return;
+      }
+
+      salvarAgendamento(nomeCliente, dataHora, servico);
+    });
+  </script>
+
+</body>
+</html>
