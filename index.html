@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agendamento Online - Manicure e Pedicure</title>
+  <title>Agendamento Online - Michelly Pessoa</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -81,7 +81,7 @@
 <body>
 
   <header>
-    Agendamento Online - Manicure e Pedicure
+    Agendamento Online - Michelly Pessoa
   </header>
 
   <div class="container">
@@ -101,6 +101,8 @@
         <label for="servico">Selecione o Serviço:</label>
         <select id="servico" name="servico" required>
           <option value="Manicure e Pedicure">Manicure e Pedicure</option>
+          <option value="Unha em Gel">Unha em Gel</option>
+          <option value="Unha em Fibra">Unha em Fibra</option>
         </select>
       </div>
 
@@ -108,10 +110,11 @@
     </form>
 
     <div class="message" id="message"></div>
+    <div class="message" id="pixMessage"></div>
   </div>
 
   <footer>
-    <p>&copy; 2025 Michelly Vanessa - Manicure e Pedicure</p>
+    <p>&copy; 2025 Michelly Pessoa - Manicure e Pedicure</p>
   </footer>
 
   <script type="module">
@@ -148,6 +151,8 @@
           }).then(() => {
             document.getElementById('message').innerHTML = "Agendamento realizado com sucesso!";
             document.getElementById('message').classList.add('success');
+            document.getElementById('pixMessage').innerHTML = "Por favor, faça o pagamento de R$15,00 via Pix para o número 08751416417 para confirmar seu agendamento.";
+            document.getElementById('pixMessage').classList.add('success');
           }).catch((error) => {
             document.getElementById('message').innerHTML = "Erro ao agendar: " + error.message;
             document.getElementById('message').classList.add('error');
