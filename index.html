@@ -118,6 +118,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
+    // Configuração do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCS4CZMvoR5ncU91tRexpodsInLnxoshyk",
       authDomain: "teste-6644a.firebaseapp.com",
@@ -131,6 +132,7 @@
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
 
+    // Função para salvar agendamento no Firebase
     function salvarAgendamento(nomeCliente, dataHora, servico) {
       const horarioRef = ref(database, 'agendamentos/' + dataHora);
 
@@ -157,18 +159,23 @@
       });
     }
 
+    // Manipulador de envio do formulário
     document.getElementById('agendamentoForm').addEventListener('submit', (event) => {
-      event.preventDefault();
+      event.preventDefault(); // Impede o envio padrão do formulário
+
+      // Coleta dos dados do formulário
       const nomeCliente = document.getElementById('nomeCliente').value;
       const dataHora = document.getElementById('dataHora').value;
       const servico = document.getElementById('servico').value;
 
+      // Verificação de campos obrigatórios
       if (!nomeCliente || !dataHora || !servico) {
         document.getElementById('message').innerHTML = "Preencha todos os campos.";
         document.getElementById('message').classList.add('error');
         return;
       }
 
+      // Salva o agendamento no Firebase
       salvarAgendamento(nomeCliente, dataHora, servico);
     });
   </script>
