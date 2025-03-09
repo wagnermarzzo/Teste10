@@ -1,185 +1,170 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agendamento Online - Michelly Pessoa</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f1f1f1;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #ff4081;
-      color: white;
-      padding: 15px 0;
-      text-align: center;
-      font-size: 24px;
-      font-weight: bold;
-    }
-    .container {
-      width: 80%;
-      margin: 20px auto;
-      background-color: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    label {
-      font-size: 18px;
-      font-weight: bold;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-    button {
-      background-color: #4CAF50;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      border: none;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-    .message {
-      margin-top: 20px;
-      font-size: 18px;
-      color: #333;
-    }
-    .message.error {
-      color: red;
-    }
-    .message.success {
-      color: green;
-    }
-    footer {
-      text-align: center;
-      padding: 15px;
-      background-color: #ff4081;
-      color: white;
-      margin-top: 30px;
-    }
-  </style>
-</head>
-<body>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento de Unhas - Michelly Pessoa</title>
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+      import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-  <header>
-    Agendamento Online - Michelly Pessoa
-  </header>
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCS4CZMvoR5ncU91tRexpodsInLnxoshyk",
+        authDomain: "teste-6644a.firebaseapp.com",
+        projectId: "teste-6644a",
+        storageBucket: "teste-6644a.firebasestorage.app",
+        messagingSenderId: "217263201644",
+        appId: "1:217263201644:web:7dfc9c5b13b1751615a749",
+        measurementId: "G-4LSD66E81M"
+      };
 
-  <div class="container">
-    <h2>Agende seu Atendimento</h2>
-    <form id="agendamentoForm">
-      <div class="form-group">
-        <label for="nomeCliente">Nome:</label>
-        <input type="text" id="nomeCliente" name="nomeCliente" required>
-      </div>
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
 
-      <div class="form-group">
-        <label for="dataHora">Data e Hora:</label>
-        <input type="datetime-local" id="dataHora" name="dataHora" required>
-      </div>
+      // Function to check if the chosen time is available
+      async function checkAvailability(date, time) {
+        const dbRef = ref(db, 'appointments/' + date);
+        const snapshot = await get(dbRef);
 
-      <div class="form-group">
-        <label for="servico">Selecione o Serviço:</label>
-        <select id="servico" name="servico" required>
-          <option value="Manicure e Pedicure">Manicure e Pedicure</option>
-          <option value="Unha em Gel">Unha em Gel</option>
-          <option value="Unha em Fibra">Unha em Fibra</option>
-        </select>
-      </div>
-
-      <button type="submit">Agendar</button>
-    </form>
-
-    <div class="message" id="message"></div>
-    <div class="message" id="pixMessage"></div>
-  </div>
-
-  <footer>
-    <p>&copy; 2025 Michelly Pessoa - Manicure e Pedicure</p>
-  </footer>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-    // Configuração do Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyCS4CZMvoR5ncU91tRexpodsInLnxoshyk",
-      authDomain: "teste-6644a.firebaseapp.com",
-      projectId: "teste-6644a",
-      storageBucket: "teste-6644a.firebasestorage.app",
-      messagingSenderId: "217263201644",
-      appId: "1:217263201644:web:7dfc9c5b13b1751615a749",
-      measurementId: "G-4LSD66E81M"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-
-    // Função para salvar agendamento no Firebase
-    function salvarAgendamento(nomeCliente, dataHora, servico) {
-      const horarioRef = ref(database, 'agendamentos/' + dataHora);
-
-      // Verificação se o horário já está ocupado
-      get(horarioRef).then((snapshot) => {
         if (snapshot.exists()) {
-          document.getElementById('message').innerHTML = "Este horário já está ocupado. Escolha outro.";
-          document.getElementById('message').classList.add('error');
+          const appointments = snapshot.val();
+          return !appointments[time]; // Return true if time is available
         } else {
-          // Salva no Firebase
-          set(ref(database, 'agendamentos/' + dataHora + '/' + nomeCliente), {
-            nome: nomeCliente,
-            dataHora: dataHora,
-            servico: servico
-          }).then(() => {
-            document.getElementById('message').innerHTML = "Agendamento realizado com sucesso!";
-            document.getElementById('message').classList.add('success');
-            document.getElementById('pixMessage').innerHTML = "Por favor, faça o pagamento de R$15,00 via Pix para o número 08751416417 para confirmar seu agendamento.";
-            document.getElementById('pixMessage').classList.add('success');
-          }).catch((error) => {
-            document.getElementById('message').innerHTML = "Erro ao agendar: " + error.message;
-            document.getElementById('message').classList.add('error');
-          });
+          return true; // No appointments on this date
         }
-      }).catch((error) => {
-        document.getElementById('message').innerHTML = "Erro ao verificar horário: " + error.message;
-        document.getElementById('message').classList.add('error');
-      });
-    }
-
-    // Manipulador de envio do formulário
-    document.getElementById('agendamentoForm').addEventListener('submit', (event) => {
-      event.preventDefault(); // Impede o envio padrão do formulário
-
-      // Coleta dos dados do formulário
-      const nomeCliente = document.getElementById('nomeCliente').value;
-      const dataHora = document.getElementById('dataHora').value;
-      const servico = document.getElementById('servico').value;
-
-      // Verificação de campos obrigatórios
-      if (!nomeCliente || !dataHora || !servico) {
-        document.getElementById('message').innerHTML = "Preencha todos os campos.";
-        document.getElementById('message').classList.add('error');
-        return;
       }
 
-      // Salva o agendamento no Firebase
-      salvarAgendamento(nomeCliente, dataHora, servico);
-    });
-  </script>
+      // Function to save the appointment in Firebase
+      async function saveAppointment(date, time, service, name, contact) {
+        const isAvailable = await checkAvailability(date, time);
+        if (!isAvailable) {
+          alert('Este horário já está agendado.');
+          return;
+        }
 
+        const appointmentData = {
+          name: name,
+          contact: contact,
+          service: service,
+        };
+
+        const appointmentRef = ref(db, 'appointments/' + date + '/' + time);
+        await set(appointmentRef, appointmentData);
+
+        alert('Agendamento realizado com sucesso! Por favor, faça o pagamento via Pix.');
+      }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 500px;
+            margin: auto;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .form-footer {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Agendamento de Unhas</h1>
+    <form id="appointmentForm">
+        <label for="date">Escolha a data:</label>
+        <input type="date" id="date" required><br><br>
+
+        <label for="time">Escolha o horário:</label>
+        <select id="time" required>
+            <option value="18:00">18:00</option>
+            <option value="19:00">19:00</option>
+            <option value="20:00">20:00</option>
+            <option value="07:00">07:00</option>
+            <option value="09:00">09:00</option>
+            <option value="11:00">11:00</option>
+            <option value="14:00">14:00</option>
+            <option value="17:00">17:00</option>
+            <option value="19:00">19:00</option>
+        </select><br><br>
+
+        <label for="service">Serviço:</label>
+        <select id="service" required>
+            <option value="Unha em Gel">Unha em Gel</option>
+            <option value="Unha em Fibra">Unha em Fibra</option>
+        </select><br><br>
+
+        <label for="name">Seu nome:</label>
+        <input type="text" id="name" required><br><br>
+
+        <label for="contact">Seu contato:</label>
+        <input type="text" id="contact" required><br><br>
+
+        <button type="button" onclick="submitAppointment()">Agendar</button>
+    </form>
+
+    <div class="form-footer">
+        <p>Após realizar o agendamento, por favor, faça o pagamento via Pix (R$15,00). Número: <strong>08751416417</strong></p>
+    </div>
+
+    <script>
+        async function submitAppointment() {
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const service = document.getElementById('service').value;
+            const name = document.getElementById('name').value;
+            const contact = document.getElementById('contact').value;
+
+            // Check if all fields are filled
+            if (!date || !time || !service || !name || !contact) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+
+            // Call the function to save the appointment
+            await saveAppointment(date, time, service, name, contact);
+        }
+    </script>
 </body>
-</html>
+          </html>
